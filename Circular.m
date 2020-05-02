@@ -1,10 +1,10 @@
 %% MATLAB Initialization
-format compact
-close all
-clc
+% format compact
+% close all
+% clc
 %% Paramaters
 r = 0.1/2; %[mm] 
-x = linspace(0,2*r);
+cx = linspace(0,2*r);
 area = zeros(1,length(x));
 %% Functions Headers
 top = @(x) r+(r.^2-(x-r).^2).^0.5; %Top half circle equation
@@ -27,9 +27,9 @@ end
 % ylabel('Area [mm^2]')
 linear = linspace(area(1),area(length(area)));
 figure()
-plot(x,area)
+% plot(x,area)
 hold 'on'
-plot(x,linear,':')
+% plot(x,linear,':')
 grid 'on'
 xlabel('d [mm]')
 ylabel('Area [mm^2]')
