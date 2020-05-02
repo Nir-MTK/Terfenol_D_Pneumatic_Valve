@@ -1,0 +1,39 @@
+%% MATLAB Initialization
+format compact
+close all
+clc
+%% Paramaters
+x = 10; %[mm] Vertex length
+deg=deg2rad(30); 
+a = [0,0];
+b = [x*cos(deg),x*sin(deg)];
+c = [x*cos(deg),0];
+base = linspace(0,max(b(1)));
+plot(a(1),a(2), 'ro', 'LineWidth', 2, 'MarkerSize', 10)
+hold on
+plot(b(1),b(2), 'ro', 'LineWidth', 2, 'MarkerSize', 10)
+hold on
+plot(c(1),c(2), 'ro', 'LineWidth', 2, 'MarkerSize', 10)
+
+
+ line = polyfit([a(1),b(1)],[a(2),b(2)],1);
+figure()
+plot(base,polyval(line,base))
+func = @(d) line(1).*d + line(2);
+
+ for i = 0:length
+
+
+
+
+
+
+
+%% Functions Headers
+
+
+%% Calculating the total area open for air fluid as function of deformation
+for i = 1:length(x)
+    area(i) = integral(top,0,x(i)) - integral(bottom,0,x(i));
+end
+
