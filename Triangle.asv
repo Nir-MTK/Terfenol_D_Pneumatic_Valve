@@ -3,37 +3,30 @@ format compact
 close all
 clc
 %% Paramaters
-x = 10; %[mm] Vertex length
-deg=deg2rad(30); 
-a = [0,0];
-b = [x*cos(deg),x*sin(deg)];
-c = [x*cos(deg),0];
+x = 0.1154; %[mm] Vertex length
+w = 20; %[deg] Half traingle top angle 
+deg=deg2rad(w); 
+a = [0,0]; % Triangle 1st edge
+b = [x*cos(deg),x*sin(deg)]; % Triangle 2nd edge
+c = [x*cos(deg),0];% Triangle 3rd edge
 base = linspace(0,max(b(1)));
-plot(a(1),a(2), 'ro', 'LineWidth', 2, 'MarkerSize', 10)
-hold on
-plot(b(1),b(2), 'ro', 'LineWidth', 2, 'MarkerSize', 10)
-hold on
-plot(c(1),c(2), 'ro', 'LineWidth', 2, 'MarkerSize', 10)
+line = polyfit([a(1),b(1)],[a(2),b(2)],1);
 
-
- line = polyfit([a(1),b(1)],[a(2),b(2)],1);
-figure()
+figure() %Plotting triangle shape
 plot(base,polyval(line,base))
-func = @(d) line(1).*d + line(2);
+hold on
+plot(base,-1*polyval(line,base))
 
- for i = 0:length
+tri_func = @(d) line(1).*d + line(2);
 
+ for i = 1:length(base)
+     tri_area(i) = integral(tri_func,0,base(i));
+ end
+ figure()
+ plot(base,2.*tri_area)
 
-
-
-
-
-
-%% Functions Headers
-
-
-%% Calculating the total area open for air fluid as function of deformation
-for i = 1:length(x)
-    area(i) = integral(top,0,x(i)) - integral(bottom,0,x(i));
-end
-
+%  run('Circular.m')
+% figure()
+% plot(x,area)
+% hold on
+% plot(base,2.*tri_area)
