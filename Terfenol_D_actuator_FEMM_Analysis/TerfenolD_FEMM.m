@@ -1,25 +1,15 @@
+%This program used for dynamic simulatiob of a Terfenol-D Actuator using
+%FEMM.
 %% MATLAB Initiallization
 format compact
 close all
 clc
-%% Actuator Settings
-plunger_xy =[
-0 , 20.7; ...
-14.45 , 20.7; ...
-14.45 , 46.9; ...
-0 , 46.9; ...
-];
-
-plunger_x = plunger_xy(:,1);
-plunger_y = plunger_xy(:,2);
-
-
-
-%% Creating Problem in FEMM
-openfemm; 
-newdocument(0)
-mi_probdef(400,'millimeters','axi',1e-8,0,-30,0)
-%Draw Plunger:
-mi_drawpolygon(plunger_xy)
-mi_zoomnatural
-mi_showgrid
+CircName = 'Coil';
+%% Open existing problem
+openfemm;
+opendocument('H:\Terfenol_D_Pneumatic_Valve\FEMM\Terfenol_Solenoid_2.FEM') %load FEMM problem
+mi_setcurrent(CircName,10) %Set the current to 0
+mi_analyze(0)
+mi_loadsolution
+mo_selectblock(15,50)
+mo_blockintegral(2)

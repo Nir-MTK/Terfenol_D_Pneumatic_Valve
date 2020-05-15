@@ -3,18 +3,47 @@ format compact
 close all
 clc
 %% Actuator Settings
-x_y_plunger = [1,2,1,2 ; 1, 1 10,10];
-0
-14.45
-14.45
-0
+
+%Plunger
+plunger_xy =[...
+0 , 20.7; ...
+14.45 , 20.7; ...
+14.45 , 46.9; ...
+0 , 46.9; ...
+];
+
+%Coil
+coil_xy = [...   
+17.4 , 6 ...
+24.2 , 6 ...
+24.2 , 36 ...
+17.4 , 36 ...
+];
+    
+
+
+plunger_x = plunger_xy(:,1);
+plunger_y = plunger_xy(:,2);
+
+ 
+%% Open existing problem
+
+openfemm;
+opendocument('H:\Terfenol_D_Pneumatic_Valve\FEMM\Terfenol_Solenoid_3.FEM')
 
 
 
 
-
-%% Creating Problem in FEMM
-openfemm; 
-newdocument(0)
-%Draw Plunger:
-mi addnode(x,y)
+% %% Creating Problem in FEMM
+% openfemm; 
+% newdocument(0)
+% mi_probdef(0,'millimeters','axi',1e-8,0,-30,0)
+% %Draw Plunger:
+% mi_drawpolygon(plunger_xy)
+% mi_setblockprop('Plunger',0,1,'<None>', 0, 0, 0); 
+% 
+% 
+% 
+% %% Problem View Settings
+% mi_zoomnatural
+% mi_showgrid
