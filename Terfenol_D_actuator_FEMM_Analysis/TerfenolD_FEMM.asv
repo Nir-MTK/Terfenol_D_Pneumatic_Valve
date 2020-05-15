@@ -1,0 +1,20 @@
+%% MATLAB Initiallization
+format compact
+close all
+clc
+%% Actuator Settings
+x_y_plunger = [1,2,1,2 ; 1, 1 10,10];
+0
+14.45
+14.45
+0
+
+
+
+
+
+%% Creating Problem in FEMM
+openfemm; 
+newdocument(0)
+%Draw Plunger:
+mi addnode(x,y)
