@@ -1867,7 +1867,27 @@ grid on
 xlabel('Current [A]')
 ylabel('Plunger Strain [ppm]')
 hold on
-tdpoly = polyfit(i_vec,s,3);
-td_plunger = polyval(tdpoly,i_vec);
-plot(i_vec,td_plunger)
+%% Polynomial fitting and compearing
+min_ord = 1;
+max_ord = 5;
+subp = max_ord-min_ord+1;
+for order = min_ord:max_ord
+    tdpoly = polyfit(i_vec,s,order);
+    td_plunger = polyval(tdpoly,i_vec);
+    figure(1)
+    polydiff = td_plunger-s;
+    plot(i_vec,polydiff);
+    RMS=rms(polydiff);
+    title('f1')
+
+    figure(2)
+    plot(i_vec,td_plunger)
+    hold on
+    plot(i_vec,s)
+    hold off
+    %title(['Polynom order: ' num2str(order) ; 'RMS: ' num2str(RMS)])
+end
+%% Accuracy of polynomial fitting
+
+
 
