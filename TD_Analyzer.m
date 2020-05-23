@@ -1781,7 +1781,7 @@ fig_dir = [casename '_Analysis figs__' datestr(now,'mmmm dd, yyyy HH;MM;SS')];
 mkdir (fig_dir); %Create a new sub-folder for simulation figs
 end
 i_vec = 0:1:10;
-n_coil = 120000; %Number of coil turns
+n_coil = 1200; %Number of coil turns
 z = linspace(-50,50,length(i_vec));
 %axis_data = zeros(length(i_vec),14);
 %% Open existing problem
@@ -1796,7 +1796,7 @@ close all
 mi_analyze(1)
 
 mi_loadsolution
-mo_selectblock(15,50)
+mo_selectblock(12,1)
 if(save_fig)
     mo_savebitmap([ fig_dir '\' num2str(i_vec(i)) '.bmp']);
 end
@@ -1827,9 +1827,14 @@ two_component_of_weighted_stress_tensor_torque_sol(i) =  mo_blockintegral(23);
 R2_sol(i) =  mo_blockintegral(24); %Moment of inertia/density
 
 %% line
-mo_clearblock
-mo_addcontour(10,50);
-mo_addcontour(10,-50);
+% mo_clearblock
+% mo_addcontour(10,50);
+% mo_addcontour(10,-50);
+% axis_data(i,:) = abs(mo_lineintegral(1));
+
+mo_clearcontour
+mo_addcontour(30,-50);
+mo_addcontour(30,50);
 axis_data(i,:) = abs(mo_lineintegral(1));
 
 
@@ -1839,7 +1844,7 @@ end
 %% Create I-H Polynome
 %% ===================
 %% RAW DATA
-Hn = axis_data(:,1);
+Hn = axis_data(:,2);
 Hn=Hn';
 figure(1)
 plot(i_vec,Hn)
@@ -1869,15 +1874,15 @@ grid on
 xlabel('Current [A]')
 ylabel('Plunger Strain [ppm]')
 %hold on
-%%
- %Current required to specifiead H value:
-hipoly = polyfit(Hn,i_vec,4);
-req_i = polyval(hipoly,H); %Calculate the required current for factory data H values
-figure()
-plot(req_i,H) %Visualising the current requires to get the factory data H values
-ylabel('Current [A]')
-xlabel('Magnetic Field [A/m]')
-hold on
+% %%
+%  %Current required to specifiead H value:
+% hipoly = polyfit(Hn,i_vec,4);
+% req_i = polyval(hipoly,H); %Calculate the required current for factory data H values
+% figure()
+% plot(req_i,H) %Visualising the current requires to get the factory data H values
+% ylabel('Current [A]')
+% xlabel('Magnetic Field [A/m]')
+% hold on
 %% Interpulation
 comp_h = polyval(ihpoly,i_vec); %Calculate the magnetic field created by i_vec
 figure()
