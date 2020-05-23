@@ -1724,8 +1724,9 @@ SS = [
 28.94082
 9.579
 ];
-max_ppm = 1010; %[ppm] - max required Strain value
+%% Create Data Vectors
 
+max_ppm = 1010; %[ppm] - max required Strain value
 %UNCOMMENT NEXT LINE FOR MAXIMUM DATA PMM 
 %max_ppm = max(SS+1)
 
@@ -1738,7 +1739,7 @@ for i=1:length(HH)
     j=j+1;
     end
 end
-polyopt(H,S,2,6,0);
+polyopt(H,S,2,8,1); %Calculation optimal polynomial order
 close all
 %% 
 figure('Name','HS DATA')
@@ -1751,7 +1752,7 @@ plot(hbase,hsval); % ploting polynomial fitting: Strain as function of Magnetic 
 grid 'on'
 ylabel('Strain [ppm]')
 xlabel('Magnetic Field [kA/m]')
-title('Terfenol-D Strain Modeling')
+title({'Terfenol-D Strain Modeling';'4th order Polynomial fitting'})
 %% Raw Data Plotting
 figure('Name','SH DATA')
 plot(S,H)
@@ -1771,6 +1772,15 @@ plot(sbase,shval);
 for i = 1:length(H)
     dif_s(i) = S(i)-polyval(hspoly,H(i));
 end
+figure()
+plot(H,dif_s)
+grid 'on'
+xlabel('Magnetic Field [kA/m]')
+ylabel('Difference [ppm]')
+title({'Raw Data vs. Polynomial Data' ; ['RMS: ' num2str(rms(dif_s)) '[ppm]']})
+hold on
+plot(H,zeros(1,length(H)),'k');
+hold off
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% FEMM Simulation
 CircName = 'Coil';
@@ -1839,7 +1849,7 @@ axis_data(i,:) = abs(mo_lineintegral(1));
 
 
 end
-%closefemm
+closefemm
 
 %% Create I-H Polynome
 %% ===================
@@ -1854,7 +1864,7 @@ ylabel('Magnetic Field Intensity [T]')
 hold on
 
 % I-H Polynom orser optimization
-polyopt(i_vec,Hn,2,10,1);
+polyopt(i_vec,Hn,2,10,0);
 %% I-H polynom
 ihpoly = polyfit(i_vec,Hn,4);
 ihpolyval = polyval(ihpoly,i_vec);
@@ -1889,5 +1899,14 @@ figure()
 plot(H,S);
 hold on
 plot(comp_h,td_is)
-title('Raw Data Comperasion')
-    
+hold off
+grid on
+title('Raw Data Comparison')
+%% Function composition
+syms i h 
+ihfunc =  1e3*-0.004*i.^4 + 1e3*0.1014*i.^3 - 1e3*-0.9282*i.^2+1e3*7.9403*i.^1+1e3*0.0766*i.^0;
+hsfunc = 1.0048e-15*h.^4 -1.0192e-10*h.^3+2.8422e-6*h.^2+0.0089*h.^1+10.4412*h.^0;
+td_func = compose(hsfunc,ihfunc);
+
+figure('Name','Function composition')
+plot(i_vec,td_func(i_vec))

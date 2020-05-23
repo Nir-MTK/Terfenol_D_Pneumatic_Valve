@@ -1,4 +1,4 @@
-function [opt] = polyopt(x,y,min_order,max_order)
+function [opt] = polyopt(x,y,min_order,max_order,resplot)
 %Polynimial fitting optimization 
 %   Detailed explanation goes here
 i = 1;
@@ -8,11 +8,14 @@ for order = min_order:max_order
    poly = polyfit(x,y,order);
    opt(i,2) = rms((polyval(poly,x))-y); %RMS Calculation
    i=i+1;
-end
-plot(opt(:,1),opt(:,2),'-*')
-grid on
-xlabel('Polynomial Order')
-ylabel('RMS')
-title('Polynomial Order Optimization tool')
-end
+end % end for loop
+if(resplot)
+    figure('Name','RMS Plotting')
+    plot(opt(:,1),opt(:,2),'-*')
+    grid on
+    xlabel('Polynomial Order')
+    ylabel('RMS')
+    title('Polynomial Order Optimization tool')
+end % end if loop
+end % end function
 
