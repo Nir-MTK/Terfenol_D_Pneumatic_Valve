@@ -1738,7 +1738,7 @@ for i=1:length(HH)
     j=j+1;
     end
 end
-
+polyopt(H,S,2,7);
 %% 
 figure('Name','HS DATA')
 plot(H,S); %Plotting raw data

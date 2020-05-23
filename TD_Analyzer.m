@@ -4,7 +4,7 @@ clear all
 close all
 clc
 %% Raw Data assign
-HH =1e3* [0.464409349
+HH =1e3*[0.464409349
 1.161022577
 1.857635806
 2.554249034
@@ -1780,7 +1780,8 @@ if(save_fig)
 fig_dir = [casename '_Analysis figs__' datestr(now,'mmmm dd, yyyy HH;MM;SS')];
 mkdir (fig_dir); %Create a new sub-folder for simulation figs
 end
-i_vec = 0:0.1:10;
+i_vec = 0:1:10;
+n_coil = 120000; %Number of coil turns
 z = linspace(-50,50,length(i_vec));
 %axis_data = zeros(length(i_vec),14);
 %% Open existing problem
@@ -1788,7 +1789,10 @@ openfemm;
 
 opendocument('H:\Terfenol_D_Pneumatic_Valve\FEMM\Terfenol_Solenoid_2.FEM') %load FEMM problem
 for i = 1:length(i_vec)
+mi_selectlabel(35,-12);
+mi_setblockprop('12 AWG', 1,0,'Coil', 0, 0, n_coil);
 mi_setcurrent(CircName,i_vec(i)) %Set the current to 0
+close all
 mi_analyze(1)
 
 mi_loadsolution
@@ -1824,76 +1828,61 @@ R2_sol(i) =  mo_blockintegral(24); %Moment of inertia/density
 
 %% line
 mo_clearblock
-mo_addcontour(10.1,-50);
-mo_addcontour(10.1,50);
-axis_data(i,:) = mo_lineintegral(1);
+mo_addcontour(10,50);
+mo_addcontour(10,-50);
+axis_data(i,:) = abs(mo_lineintegral(1));
 
 
 end
-% closefemm
+%closefemm
 
 %% Create I-H Polynome
 %% ===================
 %% RAW DATA
 Hn = axis_data(:,1);
 Hn=Hn';
+figure(1)
 plot(i_vec,Hn)
 grid on
 xlabel('Current [A]')
 ylabel('Magnetic Field Intensity [T]')
 hold on
 
-
-%% 3rd order polynom
-ihpoly3 = polyfit(i_vec,Hn,3);
-ihpolyval3 = polyval(ihpoly3,i_vec);
-plot(i_vec,ihpolyval3);
+% I-H Polynom orser optimization
+polyopt(i_vec,Hn,2,10,1);
+%% I-H polynom
+ihpoly = polyfit(i_vec,Hn,4);
+ihpolyval = polyval(ihpoly,i_vec);
+figure(1)
+plot(i_vec,ihpolyval);
 hold off
-
-
 %% I-S Polynomial fitting
 
 for i=1:length(i_vec)
-    h = polyval(ihpoly3,i_vec(i));
-    s(i) = polyval(hspoly,h);
+    h = polyval(ihpoly,i_vec(i));
+    td_is(i) = polyval(hspoly,h);
 end
 % close all
-plot(i_vec,s);
+plot(i_vec,td_is);
 title('Terfenol-D Plunger Simulation')
 grid on
 xlabel('Current [A]')
 ylabel('Plunger Strain [ppm]')
-hold on
-
+%hold on
+%%
  %Current required to specifiead H value:
-ihpoly = polyfit(Hn,i_vec,3);
-ref_i = polyval(ihpoly,H); %Calculate the required current for factory data H values
+hipoly = polyfit(Hn,i_vec,4);
+req_i = polyval(hipoly,H); %Calculate the required current for factory data H values
 figure()
-plot(ref_i,H) %Visualising the current requires to get the factory data H values
-legend('show')
-
-
-% %% Polynomial Optimization
-% min_ord = 2;
-% max_ord = 10;
-% figure(1)
-% for order = min_ord:max_ord
-%     tdpoly = polyfit(i_vec,s,order);
-%     td_plunger = polyval(tdpoly,i_vec);
-%     polydiff = td_plunger-s;
-%     plot(i_vec,td_plunger)
-%     hold on
-% %     figure(order)
-% %     plot(i_vec,polydiff);
-%     RMS(i)=rms(polydiff);
-%     RMS_order(i) = order;
-%     title(num2str(order))
-% end
-%     figure('Name','RMS')
-%     plot(RMS_order,RMS)
-%     %title(['Polynom order: ' num2str(order) ; 'RMS: ' num2str(RMS)])
-% 
-% %% Accuracy of polynomial fitting
-% plot(i_vec,s)
-
-
+plot(req_i,H) %Visualising the current requires to get the factory data H values
+ylabel('Current [A]')
+xlabel('Magnetic Field [A/m]')
+hold on
+%% Interpulation
+comp_h = polyval(ihpoly,i_vec); %Calculate the magnetic field created by i_vec
+figure()
+plot(H,S);
+hold on
+plot(comp_h,td_is)
+title('Raw Data Comperasion')
+    
