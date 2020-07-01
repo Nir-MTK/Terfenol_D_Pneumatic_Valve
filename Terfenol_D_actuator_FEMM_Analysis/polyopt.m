@@ -16,6 +16,7 @@ if(resplot)
     xlabel('Polynomial Order')
     ylabel('RMS')
     title('Polynomial Order Optimization tool')
+    hold off
 end % end if loop
 end % end function
 

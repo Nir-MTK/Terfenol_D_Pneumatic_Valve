@@ -3,7 +3,7 @@ format compact
 clear all
 close all
 clc
-%% Raw Data assign
+%% Raw Data Preprossecing
 HH =1e3*[0.464409349
 1.161022577
 1.857635806
@@ -1739,9 +1739,9 @@ for i=1:length(HH)
     j=j+1;
     end
 end
-polyopt(H,S,2,8,1); %Calculation optimal polynomial order
+%polyopt(H,S,2,8,1); %Calculation optimal polynomial order
 close all
-%% 
+%% Display Polynomial fitting
 figure('Name','HS DATA')
 plot(H,S); %Plotting raw data
 hold 'on'
@@ -1753,7 +1753,7 @@ grid 'on'
 ylabel('Strain [ppm]')
 xlabel('Magnetic Field [kA/m]')
 title({'Terfenol-D Strain Modeling';'4th order Polynomial fitting'})
-%% Raw Data Plotting
+%% Required Magetic Field for Specified Strain
 figure('Name','SH DATA')
 plot(S,H)
 hold 'on'
@@ -1762,7 +1762,6 @@ xlabel('Strain [ppm]')
 ylabel('Magnetic Field [kA/m]')
 title('Required Magetic Field for Specified Strain')
 
-%% Polynomial Modeling of Raw Data
 shpoly = polyfit(S,H,3);
 sbase = linspace(0,max(S));
 shval = polyval(shpoly,sbase);
@@ -1783,18 +1782,20 @@ plot(H,zeros(1,length(H)),'k');
 hold off
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% FEMM Simulation
-CircName = 'Coil';
-save_fig = 0; % set as 1 to save FEMM simulation bitmap. Else: define as 0.
-casename ='TerfenolD Plunger 01';
-if(save_fig)
-fig_dir = [casename '_Analysis figs__' datestr(now,'mmmm dd, yyyy HH;MM;SS')];
-mkdir (fig_dir); %Create a new sub-folder for simulation figs
-end
-i_vec = 0:1:10;
+casename ='TerfenolD Plunger  Anlysis 03 '; 
+CircName = 'Coil'; % Circuit name, as defined in FEMM
+i_vec = 0:0.5:10; % from 0[A] to 10[A], 500[mA] resolution
 n_coil = 1200; %Number of coil turns
+save_fig = 1; % set as 1 to save FEMM simulation bitmap. Else: define as 0.
+if(save_fig)
+    fig_dir = [casename '_Analysis figs__' datestr(now,'mmmm dd, yyyy HH;MM;SS')];
+    mkdir (fig_dir); %Create a new sub-folder for simulation figs
+    frame = 1;
+end
+
 z = linspace(-50,50,length(i_vec));
-%axis_data = zeros(length(i_vec),14);
-%% Open existing problem
+
+%% Open existing problem and run an analysis
 openfemm;
 
 opendocument('H:\Terfenol_D_Pneumatic_Valve\FEMM\Terfenol_Solenoid_2.FEM') %load FEMM problem
@@ -1808,7 +1809,8 @@ mi_analyze(1)
 mi_loadsolution
 mo_selectblock(12,1)
 if(save_fig)
-    mo_savebitmap([ fig_dir '\' num2str(i_vec(i)) '.bmp']);
+    mo_savebitmap([ fig_dir '\' num2str(frame) '000.bmp']);
+    frame = frame+1;
 end
 AJ_sol(i) = mo_blockintegral(0); 
 A_sol(i) = mo_blockintegral(1);
@@ -1859,18 +1861,25 @@ Hn=Hn';
 figure(1)
 plot(i_vec,Hn)
 grid on
+title('Plunger Magnetic field')
 xlabel('Current [A]')
-ylabel('Magnetic Field Intensity [T]')
+ylabel('Magnetic Field Intensity [A/m]')
 hold on
 
-% I-H Polynom orser optimization
-polyopt(i_vec,Hn,2,10,0);
+%% I-H Polynom orser optimization
+%ihopt = polyopt(i_vec,Hn,2,10,1);
 %% I-H polynom
-ihpoly = polyfit(i_vec,Hn,4);
+ihpoly = polyfit(i_vec,Hn,5);
 ihpolyval = polyval(ihpoly,i_vec);
 figure(1)
 plot(i_vec,ihpolyval);
 hold off
+figure(2)
+plot(i_vec,Hn-ihpolyval);
+grid on
+xlabel('Current [A]')
+ylabel('Diff [A/m]')
+
 %% I-S Polynomial fitting
 
 for i=1:length(i_vec)
@@ -1878,35 +1887,84 @@ for i=1:length(i_vec)
     td_is(i) = polyval(hspoly,h);
 end
 % close all
-plot(i_vec,td_is);
+plot(i_vec,td_is*100e-6);
+hold on
+plot(i_vec,zeros(1,length(i_vec)),'k')
 title('Terfenol-D Plunger Simulation')
 grid on
 xlabel('Current [A]')
-ylabel('Plunger Strain [ppm]')
-%hold on
-% %%
-%  %Current required to specifiead H value:
-% hipoly = polyfit(Hn,i_vec,4);
-% req_i = polyval(hipoly,H); %Calculate the required current for factory data H values
-% figure()
-% plot(req_i,H) %Visualising the current requires to get the factory data H values
-% ylabel('Current [A]')
-% xlabel('Magnetic Field [A/m]')
-% hold on
-%% Interpulation
-comp_h = polyval(ihpoly,i_vec); %Calculate the magnetic field created by i_vec
-figure()
-plot(H,S);
-hold on
-plot(comp_h,td_is)
-hold off
-grid on
-title('Raw Data Comparison')
-%% Function composition
-syms i h 
-ihfunc =  1e3*-0.004*i.^4 + 1e3*0.1014*i.^3 - 1e3*-0.9282*i.^2+1e3*7.9403*i.^1+1e3*0.0766*i.^0;
-hsfunc = 1.0048e-15*h.^4 -1.0192e-10*h.^3+2.8422e-6*h.^2+0.0089*h.^1+10.4412*h.^0;
-td_func = compose(hsfunc,ihfunc);
+ylabel('Plunger Strain [mm]')
 
-figure('Name','Function composition')
-plot(i_vec,td_func(i_vec))
+%% Function composition
+plunger_length = 100; %[mm]
+ppm2mm = 1e-6;
+plung_movement = td_is*plunger_length*ppm2mm; % [mm]*ppm/ppm = [mm] // Translate td_is vector from [ppm] to [mm]
+
+%polyopt(i_vec,plung_movement,2,6,1) % 4th order
+
+tdpoly = polyfit(i_vec,plung_movement,4);
+tdpolyval = polyval(tdpoly,i_vec);
+figure()
+plot(i_vec,tdpolyval)
+grid on
+xlabel('Current [A]')
+ylabel('Plunger Movement [mm]')
+hold on
+plot(linspace(0,length(td_is),length(td_is)),td_is*100e-6)
+legend('Raw Data','4th Order Polynomial Fitting')
+title('Terfenol-D Solenoid Simulation')
+figure()
+plot(i_vec,plung_movement-tdpolyval)
+grid on
+xlabel('Current [A]')
+ylabel('Plunger Movement Diff [mm]')
+%% The Pneumatic Relation
+
+% h = 0.1; % [mm] - Max plunger movement
+% Din = 0.1:0.1:5; % [mm] - Piston input nozzle size
+% Dout = 3*h; % [mm] - Piston output nozzle size
+% Pin = inspcae(5,40,length(i_vec)); %[atm] - internal piston pressure (controlled pressure)
+% Preg = 50; %[atm] - Regulated input pressure (constant)
+% Fin = pi*Din*Pin; %Flow in
+% Fout = pi*Dout*x*Pin;
+
+Preg = 5; %[atm] - Regulated input pressure (constant)
+% Pout = 5:1:40; %[atm] - internal piston pressure range (controlled pressure)
+Din = 0.2; % [mm] - Piston input nozzle size
+Dout = 0.2; % [mm] - Piston output nozzle size
+% i=1; % plunger movement vector index
+% h = plung_movement(i); % [mm] 
+
+Fin = pi*Din*Preg; %Flow in
+% Pout = pi*Dout.*Pout;
+
+
+for i = 1:length(i_vec)
+    P(i) = (Preg*pi*Din)./(pi*Dout*plung_movement(i));% [atm] internal piston pressure
+end
+figure('Name','Internal P')
+plot(i_vec,P);
+
+%% TEST 2
+%% Flow into the piston
+Preg = 5; %[Mpa] - Regulated input pressure (constant)
+Din = 0.1:0.1:5; % [mm] - Piston input drill diameter range
+Fin = pi.*Din*Preg; %Flow in
+
+%% Flow outo the valve
+Fout = Fin; %Equillibrium status
+Dout = Din; % [mm] Piston input drill diameter range
+n = 1;% Index
+h = 0.1 - plung_movement(n); %
+
+for j = 1:length(Din)
+    for k = 1:length(i_vec)
+        P=(Fin(j))/pi*Dout(j)
+    end
+end
+
+
+
+
+
+
