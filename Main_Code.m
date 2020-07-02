@@ -1743,7 +1743,7 @@ for i=1:length(HH)
     j=j+1;
     end
 end
-%polyopt(H,S,2,8,1); %Calculation optimal polynomial order
+polyopt(H,S,2,8,'Terfenol-D Magnetostriction','ppm'); %Calculation optimal polynomial order
 close all
 %% Display Polynomial fitting
 figure('Name','HS DATA')
@@ -1870,8 +1870,8 @@ xlabel('Current [A]')
 ylabel('Magnetic Field Intensity [A/m]')
 hold on
 
-%% I-H Polynom orser optimization
-%ihopt = polyopt(i_vec,Hn,2,10,1);
+%% I-H Polynom order optimization
+ihopt = polyopt(i_vec,Hn,2,10,'Magmetic Field','A/m');
 %% I-H polynom
 ihpoly = polyfit(i_vec,Hn,5);
 ihpolyval = polyval(ihpoly,i_vec);
@@ -1904,7 +1904,7 @@ plunger_length = 100; %[mm]
 ppm2mm = 1e-6;
 plung_movement = td_is*plunger_length*ppm2mm; % [mm]*ppm/ppm = [mm] // Translate td_is vector from [ppm] to [mm]
 
-%polyopt(i_vec,plung_movement,2,6,1) % 4th order
+polyopt(i_vec,plung_movement,2,6,'Plunger Movement','mm') % 4th order
 
 tdpoly = polyfit(i_vec,plung_movement,4);
 tdpolyval = polyval(tdpoly,i_vec);
@@ -1923,11 +1923,60 @@ grid on
 xlabel('Current [A]')
 ylabel('Plunger Movement Diff [mm]')
 
-%% Pneumatic Relation
- 
-D=5; % [mm] Diameter of Valve input hole 
+%% inhole Diameter analysis for Pneumatic Relation
+
+D_range=2:6; % [mm] Diameter of Valve input hole 
 F=5; %[kg/s] Flow in 
-HHH = 0:0.01:0.1;
+P = @(h,d) F/(pi*h*d); 
+
+figure()
+for j = 1:length(D_range)
+    D = D_range(j);
+    for i = 1:length(i_vec) 
+       press_i= P(0.11-plung_movement(i),D); 
+       if press_i>=0.1
+           press(i) = press_i;
+           current(i) = i_vec(i);
+       end
+    end
+    %figure()
+    plot(current,press)
+    hold on
+    grid on
+    xlabel('Current [A]')
+    ylabel('Preassure [atm]')
+    title('Holes Diameter Compearation [mm]')
+    legend('2','3', '4', '5', '6')
+end
+%% Flow rate analysis for D=5[mm] Pneumatic Relation
+F_range=2:8; % [mm] Diameter of Valve input hole 
+D=5; %[kg/s] Flow in 
+ 
+
+figure()
+for j = 1:length(F_range)
+    F = F_range(j);
+    P = @(h,d) 1/(pi*h*d);
+    for i = 1:length(i_vec) 
+       press_i= F*P(0.11-plung_movement(i),D); 
+       if press_i>=0.1
+           press(i) = press_i;
+           current(i) = i_vec(i);
+       end
+    end
+    plot(current,press)
+    hold on
+    grid on
+    xlabel('Current [A]')
+    ylabel('Preassure [atm]')
+    title('Flow Rate Compearation [kg/m^2]')
+    legend('show')
+end
+
+%% Finale Pneumatic Relation
+
+D=6; % [mm] Diameter of Valve input hole 
+F=5; %[kg/s] Flow in 
 P = @(h,d) F/(pi*h*d); 
     for i = 1:length(i_vec) 
        press_i= P(0.11-plung_movement(i),D); 
@@ -1936,4 +1985,5 @@ P = @(h,d) F/(pi*h*d);
            current(i) = i_vec(i);
        end
     end 
+    figure()
 plot(current,press)
