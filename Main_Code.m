@@ -1927,8 +1927,13 @@ ylabel('Plunger Movement Diff [mm]')
  
 D=5; % [mm] Diameter of Valve input hole 
 F=5; %[kg/s] Flow in 
+HHH = 0:0.01:0.1;
 P = @(h,d) F/(pi*h*d); 
-    for j = 1:length(i_vec) 
-       press(j)= P(0.1-plung_movement(j),D); 
+    for i = 1:length(i_vec) 
+       press_i= P(0.11-plung_movement(i),D); 
+       if press_i>=0.1
+           press(i) = press_i;
+           current(i) = i_vec(i);
+       end
     end 
-plot(i_vec,press)
+plot(current,press)
