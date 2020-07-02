@@ -1866,7 +1866,7 @@ xlabel('Current [A]')
 ylabel('Magnetic Field Intensity [A/m]')
 hold on
 
-%% I-H Polynom orser optimization
+%% I-H Polynom order optimization
 %ihopt = polyopt(i_vec,Hn,2,10,1);
 %% I-H polynom
 ihpoly = polyfit(i_vec,Hn,5);
@@ -1959,7 +1959,7 @@ h = 0.1 - plung_movement(n); %
 
 for j = 1:length(Din)
     for k = 1:length(i_vec)
-        P=(Fin(j))/pi*Dout(j)
+        P=(Fin(j))/pi*Dout(j);
     end
 end
 
