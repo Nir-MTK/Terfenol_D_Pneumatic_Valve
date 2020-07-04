@@ -3,9 +3,9 @@ format compact
 clear all
 close all
 clc
-
+%% Raw Data Preprossecing
+run('H:\Terfenol_D_Pneumatic_Valve\TD_Raw_Data.m');
 % %% Open raw data
-open('H:\Terfenol_D_Pneumatic_Valve\TD_Raw_Data.m') 
 % raw_data = xlsread('S-H_B-H graphs.xls','Data','AV5:AW1149');     % Not recommended starting in R2019a
 % HH = 1e3*raw_data(:,1);
 % SS = raw_data(:,2);
@@ -71,7 +71,7 @@ casename ='TerfenolD Plunger  Anlysis 03 ';
 CircName = 'Coil'; % Circuit name, as defined in FEMM
 i_vec = 0:0.2:10; % from 0[A] to 10[A], 500[mA] resolution
 n_coil = 1200; %Number of coil turns
-save_fig = 39; % set as 1 to save FEMM simulation bitmap. Else: define as 0.
+save_fig = 1; % set as 1 to save FEMM simulation bitmap. Else: define as 0.
 if(save_fig)
     fig_dir = [casename '_Analysis figs__' datestr(now,'mmmm dd, yyyy HH;MM;SS')];
     mkdir (fig_dir); %Create a new sub-folder for simulation figs
@@ -286,4 +286,16 @@ hipoly = polyfit(Hn,i_vec,4);
 hipolyval = polyval(hipoly,H);
 figure()
 plot(H,hipolyval);
+grid 'on'
+xlabel('Magnetic Field Intensity [A/m]')
+ylabel('Required Current [A]')
+title('Required Current for Raw Data Field Intensity')
+
+for i = 1:10:length(H)
+    H_t = H(i);
+    i_t = polyval(hipoly,
+end
+    
+
+
 
