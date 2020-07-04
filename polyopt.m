@@ -15,7 +15,7 @@ end % end for loop
     grid on
     xlabel('Polynomial Order')
     ylabel(['RMS [' rms_u ']'])
-    title({'Polynomial Order Optimization tool'; ttl})
+    title({ttl ; 'Polynomial Order Optimization tool'})
     hold off
 
 end % end function

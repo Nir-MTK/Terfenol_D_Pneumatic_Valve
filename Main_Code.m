@@ -1975,7 +1975,7 @@ end
 
 %% Finale Pneumatic Relation
 
-D=6; % [mm] Diameter of Valve input hole 
+D=5; % [mm] Diameter of Valve input hole 
 F=5; %[kg/s] Flow in 
 P = @(h,d) F/(pi*h*d); 
     for i = 1:length(i_vec) 
@@ -1985,5 +1985,24 @@ P = @(h,d) F/(pi*h*d);
            current(i) = i_vec(i);
        end
     end 
-    figure()
+figure()
 plot(current,press)
+grid 'on'
+xlabel('Current [A]')
+ylabel('Preasure [atm]')
+title('Pressure-Current Curve')
+figure()
+plot(press,current)
+grid 'on'
+xlabel('Preasure [atm]')
+ylabel('Current [A]')
+title('Required Curnet for Specified Pressure')
+
+%% Test Prosedure
+% required current for raw data field intensity
+polyopt(Hn,i_vec,1,8,'Required Current for Raw Data Field Intensity', 'A');
+hipoly = polyfit(Hn,i_vec,4);
+hipolyval = polyval(hipoly,H);
+figure()
+plot(H,hipolyval);
+
