@@ -197,7 +197,7 @@ plot(i_vec,tdpolyval)
 grid on
 xlabel('Current [A]')
 ylabel('Plunger Movement [mm]')
-legend('Raw Data','4th Order Polynomial Fitting')
+%%legend('Raw Data','4th Order Polynomial Fitting')
 title('Terfenol-D Solenoid Simulation')
 figure()
 plot(i_vec,plung_movement-tdpolyval)
@@ -314,5 +314,35 @@ xlabel('Current [A]')
 ylabel('Plunger Movement [mm]')
 title('Mathematical Model vs Raw Data')
 legend('Model Data','Raw Data')
-
-
+%%
+test_diff = (model_S - S_t);
+figure()
+plot(i_t,test_diff)
+grid 'on'
+xlabel('Current [A]')
+ylabel('Error [mm]')
+title('Mathematical Model vs Raw Data Difference')
+%% Flowrate test
+p=[5,10,20,30,50,60]; %[atm]
+d = 5e-3; %[m]
+figure()
+for j = 1:length(p)
+    k=1;
+    for i = 1:length(i_vec)        
+        f = p(j)*pi()*d*(0.1-(polyval(tdpoly,i_vec(i))));
+        if f>=0
+            f_test_vec(k) = f;
+            i_test_vec(k)=i_vec(i);
+            k=k+1;
+        end
+        
+    end
+   plot(i_test_vec,f_test_vec)
+   hold 'on'
+end
+hold 'off'
+grid 'on'
+xlabel('Current [A]')
+ylabel('Flaw Rate [m^3/s]')
+title({'Flow Rate Dynamic Analysis' ; 'D = 5 [mm]'})
+legend('5 [atm]','10 [atm]','20 [atm]','30 [atm]','50 [atm]','60 [atm]')
