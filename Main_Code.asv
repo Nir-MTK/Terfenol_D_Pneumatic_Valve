@@ -4,18 +4,13 @@ clear all
 close all
 clc
 %% Raw Data Preprossecing
-
-run('H:\Terfenol_D_Pneumatic_Valve\TD_Raw_Data.m'); %Load Terfenol-D Raw S-H data for 7.1[Mpa] Pre-stress value 
-
-%% ========================================================================
-%  Uncomment this section to processing data for different Pre-Stress Value
-%  ========================================================================
-% raw_data = xlsread('S-H_B-H graphs.xls','Data','AV5:AW1149'); %Load Raw
-% Data from factory Excel file. Change the last argument according to required pre-stress columns (S-H data). 
+run('H:\Terfenol_D_Pneumatic_Valve\TD_Raw_Data.m'); %Load Terfenol-D Raw S-H data 
+% %% Open raw data
+% raw_data = xlsread('S-H_B-H graphs.xls','Data','AV5:AW1149');     % Not recommended starting in R2019a
 % HH = 1e3*raw_data(:,1); %convert H from [kA/m] to [A/m]
 % SS = raw_data(:,2);
+%% Raw Data Pre-Processing
 
-%% 
 max_ppm = 1010; %[ppm] - max required Strain value
 
 %UNCOMMENT NEXT LINE FOR MAXIMUM DATA PMM 
@@ -30,9 +25,11 @@ for i=1:length(HH)
     j=j+1;
     end
 end
-% polyopt(H,S,2,8,'Terfenol-D Magnetostriction','ppm') %Calculation optimal polynomial order
+polyopt(H,S,2,8,'Terfenol-D Magnetostriction','ppm') %Calculation optimal polynomial order
 
-
+% B-H Curve
+run('TD_BH_Curve.m') % Processing B-H Curve Raw Data
+run('TD_BH_Curve3.m') % Create B-H Curve polynomial fitting, for positive H values.
 close all
 %% Display Polynomial fitting
 figure('Name','HS DATA')
@@ -354,3 +351,6 @@ xlabel('Current [A]')
 ylabel('Flaw Rate [kg/s]')
 title({'Flow Rate Dynamic Analysis' ; 'D = 5 [mm]'})
 legend('5 [atm]','10 [atm]','20 [atm]','30 [atm]','50 [atm]','60 [atm]')
+
+
+

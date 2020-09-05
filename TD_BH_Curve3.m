@@ -2,7 +2,7 @@
 format compact
 close all
 clc
-
+run('TD_BH_Curve.m')
 j=1;
 for i=1:length(H)
     if H(i)>=0

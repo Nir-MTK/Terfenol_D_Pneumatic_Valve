@@ -9,7 +9,6 @@ for order = min_order:max_order
    opt(i,2) = rms((polyval(poly,x))-y); %RMS Calculation
    i=i+1;
 end % end for loop
-
     figure('Name','RMS Plotting')
     plot(opt(:,1),opt(:,2),'-*')
     grid on
@@ -17,6 +16,5 @@ end % end for loop
     ylabel(['RMS [' rms_u ']'])
     title({ttl ; 'Polynomial Order Optimization tool'})
     hold off
-
 end % end function
 
